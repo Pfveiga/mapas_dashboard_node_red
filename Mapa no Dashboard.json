@@ -1,0 +1,262 @@
+[
+    {
+        "id": "cbf308616f128537",
+        "type": "tab",
+        "label": "Flow 7",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "86457344.50e6b",
+        "type": "inject",
+        "z": "cbf308616f128537",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "none",
+        "x": 150,
+        "y": 240,
+        "wires": [
+            [
+                "9a142026.fa47f"
+            ]
+        ]
+    },
+    {
+        "id": "9a142026.fa47f",
+        "type": "function",
+        "z": "cbf308616f128537",
+        "name": "add new layer",
+        "func": "msg.payload = {};\nmsg.payload.command = {};\n\nvar u = 'http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';\nvar o = { maxZoom: 19, attribution: '&copy; OpenStreetMap'};\n\nmsg.payload.command.map = {name:\"OSMhot\", url:u, opt:o};\nmsg.payload.command.layer = \"OSMhot\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 240,
+        "wires": [
+            [
+                "daf016acdc8206b4"
+            ]
+        ]
+    },
+    {
+        "id": "2998e233.4ba64e",
+        "type": "function",
+        "z": "cbf308616f128537",
+        "name": "USGS Quake monitor csv re-parse",
+        "func": "msg.payload.lat = -23.589102556510642;\nmsg.payload.lon = -46.60455350965357;\nmsg.payload.layer = \"earthquake\";\nmsg.payload.name = \"Mr.Fernando\";\nmsg.payload.icon = \"globe\";\nmsg.payload.iconColor = \"orange\";\n\ndelete msg.payload.latitude;\ndelete msg.payload.longitude;\t\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 500,
+        "wires": [
+            [
+                "daf016acdc8206b4",
+                "e72c5732.9fa198"
+            ]
+        ]
+    },
+    {
+        "id": "e72c5732.9fa198",
+        "type": "function",
+        "z": "cbf308616f128537",
+        "name": "move and zoom",
+        "func": "msg.payload = { command: { layer: \"fernando\", lat:-23.589102556510642, lon:-46.60455350965357,zoom:18} };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 280,
+        "wires": [
+            [
+                "daf016acdc8206b4"
+            ]
+        ]
+    },
+    {
+        "id": "12317723.589249",
+        "type": "csv",
+        "z": "cbf308616f128537",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": 0,
+        "strings": true,
+        "include_empty_strings": false,
+        "include_null_values": false,
+        "x": 250,
+        "y": 500,
+        "wires": [
+            [
+                "2998e233.4ba64e"
+            ]
+        ]
+    },
+    {
+        "id": "10e5e5f0.8daeaa",
+        "type": "inject",
+        "z": "cbf308616f128537",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "e72c5732.9fa198"
+            ]
+        ]
+    },
+    {
+        "id": "b6917d83.d1bac",
+        "type": "http request",
+        "z": "cbf308616f128537",
+        "name": "",
+        "method": "GET",
+        "paytoqs": "ignore",
+        "url": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 150,
+        "y": 440,
+        "wires": [
+            [
+                "12317723.589249"
+            ]
+        ]
+    },
+    {
+        "id": "3842171.4d487e8",
+        "type": "inject",
+        "z": "cbf308616f128537",
+        "name": "Quakes",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "900",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 160,
+        "y": 320,
+        "wires": [
+            [
+                "b6917d83.d1bac"
+            ]
+        ]
+    },
+    {
+        "id": "180aafc6a9ae9902",
+        "type": "inject",
+        "z": "cbf308616f128537",
+        "name": "",
+        "props": [
+            {
+                "p": "payload.nome",
+                "v": "Fernando",
+                "vt": "str"
+            },
+            {
+                "p": "payload.lat",
+                "v": "-23.58",
+                "vt": "num"
+            },
+            {
+                "p": "payload.lon",
+                "v": "-46.60",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 310,
+        "y": 80,
+        "wires": [
+            [
+                "daf016acdc8206b4"
+            ]
+        ]
+    },
+    {
+        "id": "daf016acdc8206b4",
+        "type": "ui_worldmap",
+        "z": "cbf308616f128537",
+        "group": "",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "lat": "",
+        "lon": "",
+        "zoom": "15",
+        "layer": "OSMC",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "hide",
+        "layers": "hide",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "true",
+        "coords": "none",
+        "showgrid": "false",
+        "showruler": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriDG,UKOS",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 820,
+        "y": 220,
+        "wires": []
+    }
+]
